@@ -3,6 +3,7 @@ import URLService from '../services/urlService';
 import ClickService from '../services/clickService';
 import { IURL } from '../models/URL';
 import mongoose from 'mongoose';
+import URL from '../models/URL';
 
 export const shortenURL = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -71,30 +72,13 @@ export const getURLStats = async (req: Request, res: Response, next: NextFunctio
   try {
     const { id } = req.params;
     
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({
-        status: 'fail',
-        message: 'Invalid URL ID'
-      });
-    }
-
-    const url = await URLService.getURLByShortCode(id) || 
-                 await URLService.getURLByShortCode(id); // Try as shortCode first
-    
-    if (!url) {
-      // Try finding by ID
-      const urlById = await URLService.getURLByShortCode(id); // This won't work, let me fix this
-      // Actually, let me rewrite this properly
-    }
-    
-    // Fix: Get URL by ID or shortCode
+    // Find URL by ID or shortCode
     let urlDoc: any = null;
+    
     if (mongoose.Types.ObjectId.isValid(id)) {
-      urlDoc = await URLService.getURLByShortCode(id); // This is wrong, let me fix approach
+      urlDoc = await URL.findById(id);
     }
     
-    // Better approach: try both
-    urlDoc = await URL.findById(id);
     if (!urlDoc) {
       urlDoc = await URL.findOne({ shortCode: id });
     }
